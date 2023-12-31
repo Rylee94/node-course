@@ -1,33 +1,32 @@
 const express = require("express");
-
+const morgan = require("morgan");
+const mongoose = require("mongoose");
+const blogRoutes = require("./routes/blogRoutes");
 // creating an instance of an express app
 const app = express();
+
+const dbURL =
+  "mongodb+srv://ryleepeterson:mave2020@cluster0.jru6h3h.mongodb.net/node-tut?retryWrites=true&w=majority";
+mongoose
+  .connect(dbURL)
+  .then(
+    (
+      result // listen for requests
+    ) => app.listen(3000)
+  )
+  .catch((err) => console.log(err));
 
 // register view engine
 app.set("view engine", "ejs");
 
-// listen for requests
-app.listen(3000);
+// middleware & static files
+app.use(express.static("public"));
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan("dev"));
 
 // respond to requests
 app.get("/", (req, res) => {
-  const blogs = [
-    {
-      title: "Yoshi finds eggs",
-      snippet: "Lorem ipsum dolor sit amet consectetur",
-    },
-    {
-      title: "Mario finds stars",
-      snippet: "Lorem ipsum dolor sit amet consectetur",
-    },
-    {
-      title: "How to defeat bowser",
-      snippet: "Lorem ipsum dolor sit amet consectetur",
-    },
-  ];
-  //   res.send("<p>Home!</p>");
-  // __dirname gets the current directory
-  res.render("index", { title: "Home", blogs });
+  res.redirect("/blogs");
 });
 
 app.get("/about", (req, res) => {
@@ -36,10 +35,8 @@ app.get("/about", (req, res) => {
   res.render("about", { title: "About" });
 });
 
-// blogs
-app.get("/blogs/create", (req, res) => {
-  res.render("create", { title: "Create New Blog" });
-});
+// blog routes
+app.use("/blogs", blogRoutes);
 
 // 404 page
 // .use() is a method that allows us to create middleware and fire middleware functions/
